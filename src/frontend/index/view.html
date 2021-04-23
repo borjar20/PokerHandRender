@@ -1,0 +1,339 @@
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-image: url("../utils/img/background.jpg");
+  }
+  .container {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100vw;
+    max-width: 100vw !important;
+  }
+  .body {
+    width: 2560px;
+    margin: auto;
+  }
+  h1 {
+    color: aliceblue;
+    margin: 0;
+  }
+  .carta {
+    height: 200px;
+    width: 140px;
+    margin: 10px;
+  }
+  .carta--img {
+    height: 200px;
+    width: 140px;
+    object-fit: contain;
+  }
+  .mesa {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 50px 300px;
+    height: 1100px;
+    background-color: rgb(39, 30, 23);
+    border-radius: 550px;
+  }
+  .fondo {
+    width: 90%;
+    height: 85%;
+    border-radius: 467px;
+    margin: auto;
+    background-image: url("../utils/img/pokerBackground.jpg");
+    background-size: cover;
+  }
+  .user {
+    position: absolute;
+    height: 300px;
+    width: 300px;
+    top: -10px;
+  }
+  .user--img {
+    height: 300px;
+    width: 300px;
+  }
+  .n0 {
+    left: 500px;
+    top: -120px;
+  }
+  .n1 {
+    left: 1100px;
+    top: -120px;
+  }
+  .n2 {
+    left: 1700px;
+    top: 340px;
+  }
+  .n3 {
+    left: 1100px;
+    top: 800px;
+  }
+  .n4 {
+    left: 500px;
+    top: 800px;
+  }
+  .n5 {
+    left: -50px;
+    top: 340px;
+  }
+  .user--add {
+    color: aliceblue;
+    font-weight: 700;
+    font-size: 60px;
+    position: absolute;
+    display: grid;
+    top: -30px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+  }
+  .hand {
+    position: relative;
+    display: flex;
+    top: -25px;
+    left: -50px;
+  }
+
+  .j3,
+  .j4 {
+    top: -525px;
+  }
+  .nameForm {
+    position: relative;
+    top: -50px;
+  }
+  .carta {
+    margin: -30px;
+    width: 150px;
+  }
+  .hidden {
+    position: absolute;
+    top: 0;
+    display: none;
+  }
+  .bote {
+    position: absolute;
+    top: 600px;
+    left: 975px;
+    width: 500px;
+    height: 50px;
+  }
+</style>
+
+<div class="body">
+  <h1>Poker Demo</h1>
+
+  <div class="mesa">
+    <div class="fondo">
+      <div class="player" data-ng-repeat="i in [0,1,2,3,4,5]">
+        <div class="user n{{i}}">
+          <img class="user--img" src="../utils/img/NewUser.png" alt="user" />
+          <div
+            class="user--add"
+            ng-if="!players.has(i)"
+            ng-click="addPlayer(i)"
+          >
+            <pre style="cursor: pointer">+</pre>
+          </div>
+          <div ng-if="players.has(i)">
+            <div class="user--add">
+              <p
+                style="margin: auto; cursor: pointer"
+                ng-click="deletePlayer(i)"
+              >
+                -
+              </p>
+              <p>{{playersInfo[i].jugador}}</p>
+            </div>
+            <form ng-submit="setNameAndBet(i)">
+              <div class="input-group mb-3 nameForm">
+                <input
+                  type="text"
+                  class="form-control"
+                  ng-model="nameValue[i].jugador"
+                  placeholder="Nombre"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control"
+                  ng-model="nameValue[i].apuesta"
+                  placeholder="Apuesta"
+                />
+                <button
+                  class="btn btn-secondary"
+                  type="submit"
+                  id="button-addon2"
+                >
+                  Confirm
+                </button>
+              </div>
+            </form>
+
+            <div class="hand j{{i}}">
+              <div class="cardInHand" data-ng-repeat="j in [0,1,2,3,4]">
+                <img
+                  ng-if="!playersInfo[i].cartas[j]"
+                  class="carta"
+                  ng-click="changeCard(i,j)"
+                  src="../utils/img/Cards/isa_back.png"
+                  alt=""
+                />
+                <img
+                  ng-if="playersInfo[i].cartas[j]"
+                  class="carta"
+                  ng-click="changeCard(i,j)"
+                  src="../utils/img/Cards/{{playersInfo[i].cartas[j].valor}}{{playersInfo[i].cartas[j].palo}}.png"
+                  alt=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    type="button"
+    class="btn btn-primary hidden"
+    data-bs-toggle="modal"
+    data-bs-target="#modalCardSelector"
+    id="modalBtn"
+  ></button>
+
+  <!-- Modal1 -->
+  <div
+    class="modal fade"
+    id="modalCardSelector"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Select card</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form ng-submit="saveCard()">
+          <div class="modal-body">
+            <div class="input-group">
+              <select
+                required
+                class="form-select"
+                ng-model="cardValue.valor"
+                aria-label="Default select example"
+              >
+                <option selected value="A">Ace</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="J">Jack</option>
+                <option value="Q">Queen</option>
+                <option value="K">King</option>
+              </select>
+
+              <select
+                class="form-select"
+                ng-model="cardValue.palo"
+                aria-label="Default select example"
+                required
+              >
+                <option selected value="C">Clubs</option>
+                <option value="D">Diamonds</option>
+                <option value="H">Hearts</option>
+                <option value="S">Spades</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group bote">
+    <h1 style="margin: 0 10">Bote:</h1>
+    <input
+      id="bote"
+      placeholder="Bote"
+      type="number"
+      min="0"
+      class="form-control"
+      ng-model="bote"
+    />
+    <button
+      class="btn btn-secondary"
+      type="submit"
+      ng-click="checkGame()"
+      id="button-addon2"
+    >
+      Check Game
+    </button>
+  </div>
+  <!-- Button trigger modal -->
+  <button
+    type="button"
+    id="messageBtn"
+    class="btn btn-primary hidden"
+    data-bs-toggle="modal"
+    data-bs-target="#messageModal"
+  >
+    Launch demo modal
+  </button>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="messageModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel2"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content-centered">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="card-body">
+            <h1 style="text-align: center" class="card-text">{{message}}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
